@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>బాష్పీభవనం - Interactive Activity</title>
+<style>
+  body{font-family:Arial,"Noto Sans Telugu",sans-serif;margin:0;background:#f5f8fc;color:#17324d}
+  .wrap{max-width:850px;margin:auto;padding:18px}
+  .card{background:white;border-radius:18px;padding:22px;margin:14px 0;box-shadow:0 4px 18px #00000012}
+  h1{margin:0 0 6px;font-size:28px} h2{font-size:21px}
+  .sub{color:#526b80}
+  .question{font-size:18px;font-weight:600}
+  button{border:0;border-radius:12px;padding:11px 16px;margin:5px;cursor:pointer;font-size:16px}
+  button.option{background:#e8f0f7}
+  button.option.selected{outline:3px solid #3578b7;background:#d9ebfb}
+  #start{background:#3578b7;color:white}
+  input[type=range]{width:100%}
+  .temp{font-size:30px;font-weight:700;text-align:center}
+  .scene{height:190px;position:relative;background:linear-gradient(#dff2ff,#eef9ff);border-radius:16px;overflow:hidden}
+  .water{position:absolute;left:15%;right:15%;bottom:20px;height:72px;background:#65aee8;border-radius:0 0 22px 22px;border-top:4px solid #3888c9}
+  .steam{position:absolute;bottom:98px;left:30%;right:30%;text-align:center;font-size:30px;letter-spacing:18px;opacity:.45}
+  .bar{height:22px;background:#e6edf3;border-radius:12px;overflow:hidden}
+  .fill{height:100%;width:0%;background:#3578b7;transition:.3s}
+  .feedback{padding:12px;border-radius:12px;background:#eef6ff;margin-top:12px;min-height:24px}
+  .hidden{display:none}
+  .good{background:#e9f7ed}.hint{background:#fff6df}
+  table{width:100%;border-collapse:collapse;margin-top:12px} th,td{border:1px solid #d7e0e8;padding:8px;text-align:center}
+  .small{font-size:14px;color:#60798c}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>💧 బాష్పీభవనం – Interactive Activity</h1>
+    <div class="sub">Class 6 Science | ఉష్ణోగ్రత బాష్పీభవనంపై ప్రభావం</div>
+  </div>
+
+  <div class="card" id="predictionCard">
+    <h2>1. ముందుగా అంచనా వేయండి</h2>
+    <div class="question">ఉష్ణోగ్రత పెరిగితే నీటి బాష్పీభవనం ఎలా మారుతుంది?</div>
+    <button class="option" onclick="predict('increase',this)">బాష్పీభవనం పెరుగుతుంది</button>
+    <button class="option" onclick="predict('decrease',this)">బాష్పీభవనం తగ్గుతుంది</button>
+    <button class="option" onclick="predict('same',this)">పెద్దగా మారదు</button>
+    <div id="predFeedback" class="feedback">ఒక ఎంపికను ఎంచుకోండి.</div>
+  </div>
+
+  <div class="card">
+    <h2>2. ప్రయోగం చేయండి</h2>
+    <p>Slider‌ను మార్చి నీటి బాష్పీభవనంలో వచ్చే మార్పును గమనించండి.</p>
+    <div class="temp"><span id="temp">10</span>°C</div>
+    <input id="slider" type="range" min="10" max="45" value="10" oninput="update()">
+    <div class="scene">
+      <div class="steam" id="steam">· · ·</div>
+      <div class="water"></div>
+    </div>
+    <p><b>Evaporation Rate:</b></p>
+    <div class="bar"><div id="fill" class="fill"></div></div>
+    <div id="rateText" class="feedback">ఉష్ణోగ్రత తక్కువగా ఉంది. బాష్పీభవనం నెమ్మదిగా జరుగుతుంది.</div>
+  </div>
+
+  <div class="card">
+    <h2>3. పరిశీలన పట్టిక</h2>
+    <p class="small">కనీసం మూడు వేర్వేరు ఉష్ణోగ్రతలను ప్రయత్నించండి.</p>
+    <table>
+      <thead><tr><th>ఉష్ణోగ్రత</th><th>బాష్పీభవనం</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <button id="conclude" onclick="conclude()">నా Conclusion చూడండి</button>
+    <div id="conclusion" class="feedback hidden"></div>
+  </div>
+
+  <div class="card">
+    <h2>4. రోజువారీ జీవితంతో అనుసంధానం</h2>
+    <p>☀️ ఎండలో బట్టలు త్వరగా ఆరడం</p>
+    <p>💦 చెమట ఆవిరవడం</p>
+    <p>🥣 వేడి ఆహారం నుంచి నీటి ఆవిరి బయటకు రావడం</p>
+  </div>
+
+  <div class="card">
+    <b>Learning Outcome:</b> ఉష్ణోగ్రత పెరిగినప్పుడు బాష్పీభవన వేగం పెరుగుతుందని విద్యార్థి ప్రయోగం ద్వారా గుర్తించగలడు.
+    <p class="small">Created as an educational interactive resource.</p>
+  </div>
+</div>
+
+<script>
+let prediction=null, tried=new Set();
+
+function predict(v,btn){
+  prediction=v;
+  document.querySelectorAll('.option').forEach(x=>x.classList.remove('selected'));
+  btn.classList.add('selected');
+  const f=document.getElementById('predFeedback');
+  if(v==='increase'){
+    f.className='feedback good';
+    f.textContent='మంచి అంచనా! ఇప్పుడు ప్రయోగం చేసి పరిశీలించండి.';
+  }else{
+    f.className='feedback hint';
+    f.textContent='సరే. ఇప్పుడు వివిధ ఉష్ణోగ్రతలను ప్రయత్నించి మీ అంచనాను పరీక్షించండి.';
+  }
+}
+function update(){
+  const t=+document.getElementById('slider').value;
+  document.getElementById('temp').textContent=t;
+  const rate=Math.round(((t-10)/35)*100);
+  document.getElementById('fill').style.width=rate+'%';
+  const steamCount=Math.max(3,Math.min(12,Math.round(rate/10)+3));
+  document.getElementById('steam').textContent='· '.repeat(steamCount);
+  const rt=document.getElementById('rateText');
+  if(t<20) rt.textContent='ఉష్ణోగ్రత తక్కువగా ఉంది. బాష్పీభవనం నెమ్మదిగా జరుగుతుంది.';
+  else if(t<35) rt.textContent='ఉష్ణోగ్రత పెరుగుతోంది. బాష్పీభవనం కూడా పెరుగుతోంది.';
+  else rt.textContent='ఉష్ణోగ్రత ఎక్కువగా ఉంది. బాష్పీభవనం వేగంగా జరుగుతోంది.';
+  const level=t<20?'నెమ్మదిగా':t<35?'మధ్యస్థంగా':'వేగంగా';
+  tried.add(t);
+  document.getElementById('rows').innerHTML=[...tried].sort((a,b)=>a-b)
+    .map(x=>`<tr><td>${x}°C</td><td>${x<20?'నెమ్మదిగా':x<35?'మధ్యస్థంగా':'వేగంగా'}</td></tr>`).join('');
+}
+function conclude(){
+  const c=document.getElementById('conclusion');
+  c.className='feedback good';
+  c.classList.remove('hidden');
+  if(tried.size>=3){
+    c.textContent='Conclusion: మీరు గమనించినట్లుగా, ఉష్ణోగ్రత పెరిగినప్పుడు నీటి బాష్పీభవన వేగం పెరుగుతుంది. మీ Predictionతో ఫలితాన్ని పోల్చుకోండి.';
+  }else{
+    c.className='feedback hint';
+    c.textContent='ముందుగా కనీసం 3 వేర్వేరు ఉష్ణోగ్రతలను ప్రయత్నించి, ఫలితాలను పోల్చండి.';
+  }
+}
+update();
+</script>
+</body>
+</html>
